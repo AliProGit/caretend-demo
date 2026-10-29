@@ -91,16 +91,76 @@ textarea{width:100%;min-height:70px;font:13px/1.4 Consolas,"Courier New",monospa
 #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .15s}
 #toast.show{opacity:1}
 .note{font-size:13px;color:var(--muted)}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ===== Journey mode ===== */
+body{font-family:"Segoe UI Variable","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif}
+h1,h2,h3{font-family:inherit;letter-spacing:-.01em}
+.modes{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px}
+.mode{border:0;background:none;padding:8px 16px;border-radius:9px;font-weight:600;color:var(--muted)}
+.mode[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.hide{display:none!important}
+.story{max-width:1180px;margin:0 auto;padding:22px 24px 48px}
+.hero h2{font-size:30px;margin-bottom:6px}
+.hero p{margin:0;color:var(--muted);max-width:70ch;font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 6px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 16px;text-align:left;min-width:190px}
+.chip b{display:block;font-size:15px}
+.chip span{font-size:13px;color:var(--muted)}
+.chip[aria-pressed="true"]{border-color:var(--teal);background:var(--teal-soft)}
+.track{position:relative;margin:30px 0 8px;padding-top:62px}
+.rail-line{position:absolute;left:10%;right:10%;top:109px;height:6px;border-radius:3px;background:var(--line)}
+.rail-fill{position:absolute;left:10%;top:109px;height:6px;border-radius:3px;background:var(--teal);transition:width .7s cubic-bezier(.3,.7,.2,1)}
+.stops{display:grid;grid-template-columns:repeat(5,1fr);position:relative}
+.stop{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 6px}
+.dot{width:72px;height:72px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:3px solid var(--line);color:var(--muted);transition:all .35s;position:relative;z-index:1}
+.dot svg{width:34px;height:34px}
+.stop b{margin-top:10px;font-size:15px}
+.stop small{color:var(--muted);font-size:12.5px}
+.stop[data-s="done"] .dot{background:var(--teal);border-color:var(--teal);color:var(--on-teal)}
+.stop[data-s="active"] .dot{border-color:var(--teal);color:var(--teal);box-shadow:0 0 0 7px var(--teal-soft)}
+.stop[data-s="flag"] .dot{background:var(--amber-soft);border-color:var(--amber);color:var(--amber);box-shadow:0 0 0 7px var(--amber-soft)}
+.stop[data-s="fail"] .dot{background:var(--coral-soft);border-color:var(--coral);color:var(--coral)}
+.stop[data-s="todo"]{opacity:.55}
+.token{position:absolute;top:0;left:10%;transform:translateX(-50%);transition:left .7s cubic-bezier(.3,.7,.2,1);z-index:3;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
+.rx{background:var(--ink);color:var(--bg);border-radius:10px;padding:6px 12px;font-weight:700;font-size:13px;white-space:nowrap;box-shadow:0 4px 12px rgba(0,0,0,.25)}
+.rxtag{font-size:12px;font-weight:700;padding:2px 10px;border-radius:10px;white-space:nowrap}
+.rxtag.dim{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.rxtag.ok{background:var(--teal);color:var(--on-teal)}
+.rxtag.warn{background:var(--amber);color:var(--surface)}
+.jgrid{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-top:22px}
+@media(max-width:900px){.jgrid{grid-template-columns:1fr}.stop b{font-size:13px}.dot{width:54px;height:54px}.rail-line,.rail-fill{top:98px}.chip{min-width:150px}}
+.say{border-radius:16px;background:var(--surface);border:1px solid var(--line);padding:22px}
+.say h3{font-size:24px;margin-bottom:8px}
+.say p{margin:0 0 10px;font-size:16px}
+.say .tech{font-size:13px;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:6px}
+.say.flag{border-color:var(--amber);background:var(--amber-soft)}
+.say.fail{border-color:var(--coral);background:var(--coral-soft)}
+.fixbox{margin-top:12px;border-radius:12px;background:var(--surface);border:1px solid var(--amber);padding:14px}
+.fixbox b{display:block;margin-bottom:6px}
+.screen{border-radius:16px;background:var(--surface);border:1px solid var(--line);overflow:hidden}
+.screen header{padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+.screen .body{padding:16px;min-height:150px}
+.who{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--teal);color:var(--on-teal);display:grid;place-items:center;font-weight:700}
+.empty{color:var(--muted);text-align:center;padding:20px 0}
+.rxrow{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px;border-radius:10px;background:var(--teal-soft);animation:pop .4s}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+.controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px;align-items:center}
+.progress{margin-left:auto;color:var(--muted);font-size:13px}
+.btn.big{padding:11px 22px;font-size:16px;border-radius:12px}
+.wrap-sandbox{display:block}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <header class="top">
-  <div><h1>CareTend prescriptions in Salesforce</h1><p>Interactive walkthrough. Sample data only: names, NDCs and programs are test values.</p></div>
-  <div class="switchbox"><code>PRO_Automation_Control.CareTend_Prescription</code><span id="swlabel"></span>
+  <div><h1>CareTend prescriptions in Salesforce</h1><p>Sample data only: names, NDCs and programs are test values.</p></div>
+  <div class="modes" role="group" aria-label="Demo mode"><button class="mode" id="m-story" aria-pressed="true">Patient journey</button><button class="mode" id="m-box" aria-pressed="false">Hands-on sandbox</button></div>
+  <div class="switchbox hide" id="swbox"><code>PRO_Automation_Control.CareTend_Prescription</code><span id="swlabel"></span>
     <button class="sw" id="sw" role="switch" aria-checked="true" aria-label="CareTend prescription switch"></button></div>
 </header>
-<div class="app">
+<section class="story" id="story"><div id="j-root"></div></section>
+<div class="app hide" id="sandbox">
   <aside class="rail"><h2>Demo script, 15 minutes</h2><div id="steps"></div><button class="reset" id="reset">Reset demo data</button></aside>
   <main><div class="tabs" role="tablist" id="tabs"></div><div id="view"></div></main>
 </div>
@@ -313,6 +373,125 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-open]')){e.preventDefault();e.target.click();}});
 S=fresh();render();
+
+/* ===================== PATIENT JOURNEY MODE ===================== */
+const ICON={
+ pill:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8.5" width="19" height="7" rx="3.5" transform="rotate(-35 12 12)"/><path d="M9.5 6.2l5 7.2"/></svg>',
+ send:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h13"/><path d="M12 6l6 6-6 6"/><path d="M4 6v0M4 18v0"/></svg>',
+ folder:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+ person:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+ eye:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+ check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+ warn:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v6"/><path d="M12 17v.01"/></svg>',
+ cross:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+};
+const STOPS=[
+ {t:'Pharmacy fills it',w:'CareTend',ic:'pill'},
+ {t:'Travels to Salesforce',w:'Snowflake and MuleSoft',ic:'send'},
+ {t:'Filed under a program',w:'Salesforce',ic:'folder'},
+ {t:'Matched to the patient',w:'Salesforce',ic:'person'},
+ {t:'Care team sees it',w:'Patient page',ic:'eye'}
+];
+const SCN={
+ good:{label:'A good day',feed:'daniel1',on:true,blurb:'Everything works first time.'},
+ ndc:{label:'Product not recognised',feed:'daniel2',on:true,blurb:'Salesforce cannot tell which program. Ops fix it in a minute.'},
+ twin:{label:'Look-alike patients',feed:'twin',on:true,blurb:'Two people share a name and birth date. A coordinator picks.'},
+ before:{label:'Before the new build',feed:'daniel1',on:false,blurb:'What production does today.'}
+};
+let J={scn:'good',i:0,fix:{},auto:null,st:null,row:null};
+function jrun(){
+  const st=fresh(); st.on=SCN[J.scn].on;
+  if(J.fix.ndc) st.programs[0].ndcs+='\n'+FEED.daniel2.row.ndc;
+  const row=JSON.parse(JSON.stringify(FEED[SCN[J.scn].feed].row));
+  landRow(st,row);
+  if(J.fix.twin){
+    const a=st.accounts.find(x=>x.id===J.fix.twin); row.acct=a.id; row.method='Manual';
+    const pr=resolveProgram(st.programs,row.ndc); row.program=pr.program?pr.program.id:null;
+    row.reason=pr.reason||''; row.review=!!row.reason; afterSave(st,row);
+  }
+  J.st=st;J.row=row;
+}
+function jprog(){const p=J.st.programs.find(x=>x.id===J.row.program);return p?p.name:null;}
+function jstages(){
+  const r=J.row,on=SCN[J.scn].on;
+  if(!on) return ['ok','ok','fail','fail','empty'];
+  return ['ok','ok',r.program?'ok':'flag',r.acct?'ok':'flag',(r.program&&r.acct)?'ok':'empty'];
+}
+function jtext(i,stg){
+  const r=J.row,pn=jprog(),a=J.st.accounts.find(x=>x.id===r.acct),pt=r.pt;
+  const name=pt.first+' '+pt.last;
+  if(i===0) return {h:'The pharmacy fills '+pt.first+'\'s prescription',p:pt.first+'\'s prescriber wrote it and the PRO Health pharmacy filled it in CareTend. Nothing changes here.',tech:'CareTend prescription '+r.rx+', NDC '+r.ndc};
+  if(i===1) return {h:'A copy travels to Salesforce',p:'Every 30 minutes the new and changed prescriptions are picked up and delivered. The delivery truck has one job now: carry the data, nothing more.',tech:'Snowflake snapshot, then MuleSoft upsert into the EHR Medication Prescription object'};
+  if(i===2){
+    if(stg[2]==='fail') return {h:'Nobody files it',p:'Today the delivery truck guesses the program from its own table. It does not know this product, so the prescription is filed under "Unknown Program".',tech:'MuleSoft NDC table has no entry for '+r.ndc+'. Program = Unknown Program'};
+    if(stg[2]==='flag') return {h:'Salesforce can\'t tell which program',p:'It read the product code but no program lists it. Rather than guess, it parks the prescription and says why.',tech:'Review reason: '+r.reason};
+    return {h:'Salesforce files it under '+pn,p:'It reads the product code and finds the program whose NDC list contains it. That is what lets the program\'s care team see it.',tech:'NDC '+r.ndc+' normalised to 11 digits, matched to the "'+pn+'" program'};
+  }
+  if(i===3){
+    if(stg[3]==='fail') return {h:'Nobody finds the patient',p:'Today the patient match needs the program, and the program is missing, so it can never match. The prescription belongs to no one.',tech:'Match rule keyed on name, date of birth and program'};
+    if(stg[3]==='flag') return {h:'Two people could be '+pt.first,p:'Two patients share the name '+name+' and the same birth date. Salesforce will not pick one for you.',tech:'Review reason: '+r.reason};
+    return {h:'It finds '+(a?a.first:pt.first),p:r.method==='Manual'?'A coordinator linked the right person by hand. Automation never overrides a manual match.':'Same name and birth date, one person. Salesforce also remembers '+pt.first+'\'s CareTend id so the next prescription matches instantly.',tech:'Match method: '+r.method+(a&&a.ctid?'. CareTend patient id '+a.ctid+' stored on the Account':'')};
+  }
+  if(stg[4]==='ok') return {h:'Sophie sees it on '+pt.first+'\'s page',p:'The case manager opens the patient and finds the prescription: medication, strength, route, frequency, status and program.',tech:'Visible through the program sharing rule, shown in the "Prescriptions (CareTend)" related list'};
+  return {h:'Sophie sees nothing',p:SCN[J.scn].on?'The prescription is still waiting for a fix, so the care team can not see it yet.':'This is production today. The case manager opens the patient and there is no prescription to see.',tech:SCN[J.scn].on?'Not shown until it has a program and a patient':'No program, so no sharing rule fires. No patient, so no related list'};
+}
+function jvariant(i,stg){return i<2?'':(stg[i]==='flag'?'flag':(stg[i]==='fail'||(i===4&&stg[4]==='empty'&&!SCN[J.scn].on)?'fail':''));}
+function jrender(){
+  const stg=jstages(), i=J.i, r=J.row, t=jtext(i,stg);
+  const stopState=k=>{
+    if(k<i) return stg[k]==='fail'?'fail':(stg[k]==='flag'?'flag':'done');
+    if(k===i) return stg[k]==='flag'?'flag':(stg[k]==='fail'?'fail':(stg[k]==='empty'?'fail':'active'));
+    return 'todo';
+  };
+  const dotIcon=k=>{const s=stopState(k);return s==='done'?ICON.check:(s==='flag'?ICON.warn:(s==='fail'?ICON.cross:ICON[STOPS[k].ic]));};
+  const pn=jprog(), a=J.st.accounts.find(x=>x.id===r.acct);
+  const tag=(i>=2&&pn&&stg[2]==='ok')?'<span class="rxtag ok">'+esc(pn)+'</span>':(i>=2&&stg[2]==='flag'?'<span class="rxtag warn">No program</span>':'<span class="rxtag dim">Unknown Program</span>');
+  const pos=(10+i*20)+'%', fill=(i*20*0.8*1.0)+'%';
+  const blocked=stg[i]==='flag';
+  let fix='';
+  if(blocked&&i===2) fix='<div class="fixbox"><b>Priya, the Ops coordinator, opens CareTend Review</b>She sees the reason, adds the product code to the Fennec Hears program, and presses Reprocess.<div class="actions"><button class="btn" data-jfix="ndc">Add NDC and Reprocess</button></div></div>';
+  if(blocked&&i===3) fix='<div class="fixbox"><b>Priya opens CareTend Review and presses Match Patient</b>Which '+esc(r.pt.first)+' is this?<div class="pick">'+J.st.accounts.filter(x=>x.first===r.pt.first&&x.last===r.pt.last).map(x=>'<button data-jfix="twin:'+x.id+'"><b>'+esc(x.first+' '+x.last)+'</b>, '+esc(x.city)+'<br><span class="note">Enrolled in '+esc(x.programs.map(q=>J.st.programs.find(p=>p.id===q).name).join(', '))+'</span></button>').join('')+'</div></div>';
+  const fixed=(J.fix.ndc||J.fix.twin)&&!blocked&&i>=2?'<p class="note">Fixed by Priya. The journey continues.</p>':'';
+  const screenBody=(i===4&&stg[4]==='ok')
+    ?'<div class="rxrow"><div><b>'+esc(r.med)+'</b><br><span class="note">NDC '+esc(r.ndc)+' · '+esc(r.strength)+' · '+esc(r.route)+' · '+esc(r.freq)+'</span></div><div style="text-align:right"><span class="tag ok">'+esc(r.status)+'</span><br><span class="note">'+esc(pn||'')+'</span></div></div>'
+    :'<div class="empty">'+(i===4?'No prescriptions to show.':'Waiting for the prescription…')+'</div>';
+  const done=i===4;
+  const next=blocked?'<button class="btn big" disabled>Fix it to continue</button>':(done?'<button class="btn big" data-jnav="replay">Replay this journey</button>':'<button class="btn big" data-jnav="next">Next step</button>');
+  const endNote=done?(SCN[J.scn].on?'<div class="sect"><b>Try another journey</b><br><span class="note">Pick a different scenario above, or switch to the hands-on sandbox to send your own prescriptions.</span></div>':'<div class="sect"><b>This is production today</b><br><span class="note">Same prescription, no result for Sophie. Compare it with the same journey on a good day.</span><div class="actions"><button class="btn" data-scn="good">Switch on and replay</button></div></div>'):'';
+  $('#j-root').innerHTML=
+   '<div class="hero"><h2>Follow one prescription from the pharmacy to the care team</h2><p>Daniel\'s prescription takes five stops. Pick a scenario and step through it. Amber means Salesforce needs a person, red means the stop failed.</p></div>'+
+   '<div class="chips" role="group" aria-label="Scenario">'+Object.keys(SCN).map(k=>'<button class="chip" data-scn="'+k+'" aria-pressed="'+(k===J.scn)+'"><b>'+esc(SCN[k].label)+'</b><span>'+esc(SCN[k].blurb)+'</span></button>').join('')+'</div>'+
+   '<div class="track"><div class="token" style="left:'+pos+'"><span class="rx">Rx · '+esc(r.pt.first)+' · '+esc(r.rx)+'</span>'+tag+'</div><div class="rail-line"></div><div class="rail-fill" style="width:'+(i*20)+'%;max-width:80%"></div>'+
+   '<div class="stops">'+STOPS.map((s,k)=>'<div class="stop" data-s="'+stopState(k)+'"><div class="dot">'+dotIcon(k)+'</div><b>'+esc(s.t)+'</b><small>'+esc(s.w)+'</small></div>').join('')+'</div></div>'+
+   '<div class="jgrid"><div><div class="say '+jvariant(i,stg)+'"><h3>'+esc(t.h)+'</h3><p>'+esc(t.p)+'</p>'+fixed+'<div class="tech"><b>In system terms:</b> '+esc(t.tech)+'</div></div>'+fix+endNote+'</div>'+
+   '<div class="screen"><header><span>Salesforce · '+esc(r.pt.first+' '+r.pt.last)+'</span><span>Prescriptions (CareTend)</span></header><div class="body"><div class="who"><div class="avatar">S</div><div><b>Sophie, case manager</b><br><span class="note">Looking at '+esc(r.pt.first)+'\'s patient page</span></div></div>'+screenBody+'</div></div></div>'+
+   '<div class="controls"><button class="btn alt" data-jnav="back"'+(i===0?' disabled':'')+'>Back</button>'+next+'<button class="btn alt" data-jnav="auto" aria-pressed="'+(!!J.auto)+'">'+(J.auto?'Pause auto-play':'Auto-play')+'</button><span class="progress">Stop '+(i+1)+' of 5</span></div>';
+}
+function jstop(){if(J.auto){clearInterval(J.auto);J.auto=null;}}
+function jstart(scn){jstop();J={scn:scn,i:0,fix:{},auto:null,st:null,row:null};jrun();jrender();}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-scn],[data-jnav],[data-jfix],#m-story,#m-box'); if(!b) return;
+  if(b.id==='m-story'||b.id==='m-box'){
+    const story=b.id==='m-story'; jstop();
+    $('#story').classList.toggle('hide',!story);$('#sandbox').classList.toggle('hide',story);$('#swbox').classList.toggle('hide',story);
+    $('#m-story').setAttribute('aria-pressed',story);$('#m-box').setAttribute('aria-pressed',!story);return;
+  }
+  if(b.dataset.scn) return jstart(b.dataset.scn);
+  if(b.dataset.jfix){
+    const v=b.dataset.jfix; if(v==='ndc') J.fix.ndc=true; else J.fix.twin=v.split(':')[1];
+    jrun();jrender();toast('Fixed. Reprocessed with the new information.');return;
+  }
+  const n=b.dataset.jnav, stg=jstages();
+  if(n==='next'&&J.i<4&&stg[J.i]!=='flag'){J.i++;jrender();}
+  else if(n==='back'&&J.i>0){jstop();J.i--;jrender();}
+  else if(n==='replay'){jstart(J.scn);}
+  else if(n==='auto'){
+    if(J.auto){jstop();jrender();}
+    else{J.auto=setInterval(()=>{const g=jstages();if(J.i<4&&g[J.i]!=='flag'){J.i++;jrender();}else{jstop();jrender();}},2600);jrender();}
+  }
+});
+jstart('good');
+
 </script>
 </body>
 </html>
