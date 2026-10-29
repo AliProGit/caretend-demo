@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CareTend to Salesforce: interactive demo</title>
+<style>
+:root{
+  --bg:#EDF2F2; --surface:#FFFFFF; --ink:#10272F; --muted:#56707B; --line:#CFDCDE;
+  --teal:#0F7F80; --on-teal:#FFFFFF; --teal-soft:#DDF0F0;
+  --amber:#8A5300; --amber-soft:#FBE9C8; --coral:#B83A2E; --coral-soft:#F8DCD8;
+  --green:#2E7D4B; --green-soft:#DAF0E2; color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0D1A1F; --surface:#14262D; --ink:#E4EEF0; --muted:#8FA8B2; --line:#27404A;
+    --teal:#4FC3C3; --on-teal:#08262A; --teal-soft:#16393D;
+    --amber:#F0B35A; --amber-soft:#3A2D14; --coral:#F08A7E; --coral-soft:#3C1E1B;
+    --green:#6FCB8E; --green-soft:#173424; color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,sans-serif}
+h1,h2,h3{font-family:Cambria,"Iowan Old Style",Georgia,serif;margin:0;line-height:1.2}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.top{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;padding:14px 24px;background:var(--surface);border-bottom:1px solid var(--line)}
+.top h1{font-size:22px}
+.top p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.switchbox{display:flex;align-items:center;gap:12px}
+.switchbox code{font-size:12px;color:var(--muted)}
+.sw{position:relative;width:64px;height:32px;border-radius:16px;border:2px solid var(--line);background:var(--bg);padding:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:transform .15s}
+.sw[aria-checked="true"]{background:var(--teal);border-color:var(--teal)}
+.sw[aria-checked="true"]::after{transform:translateX(32px);background:var(--on-teal)}
+.app{display:grid;grid-template-columns:310px 1fr;gap:20px;max-width:1360px;margin:0 auto;padding:20px 24px 40px}
+@media(max-width:900px){.app{grid-template-columns:1fr}}
+.rail{align-self:start;position:sticky;top:12px}
+@media(max-width:900px){.rail{position:static}}
+.rail h2{font-size:17px;margin-bottom:10px}
+.step{display:block;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.step b{display:block;font-size:14px}
+.step span{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.step[aria-current="true"]{background:var(--teal-soft);border-color:var(--teal)}
+.step small{color:var(--muted)}
+.reset{margin-top:6px;background:none;border:1px solid var(--line);border-radius:8px;padding:6px 12px;color:var(--muted)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tab{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 14px}
+.tab[aria-selected="true"]{background:var(--teal);color:var(--on-teal);border-color:var(--teal)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.panel+.panel{margin-top:14px}
+.panel h2{font-size:19px;margin-bottom:6px}
+.sub{color:var(--muted);margin:0 0 12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.stat{background:var(--bg);border-radius:10px;padding:12px}
+.stat b{display:block;font:700 28px Cambria,Georgia,serif}
+.stat span{font-size:13px;color:var(--muted)}
+.stat.bad b{color:var(--coral)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600}
+tbody tr[data-open]{cursor:pointer}
+tbody tr[data-open]:hover,tbody tr.sel{background:var(--teal-soft)}
+.scroll{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;font-weight:600}
+.tag.ok{background:var(--green-soft);color:var(--green)}
+.tag.warn{background:var(--amber-soft);color:var(--amber)}
+.tag.bad{background:var(--coral-soft);color:var(--coral)}
+.tag.dim{background:var(--bg);color:var(--muted)}
+.btn{background:var(--teal);color:var(--on-teal);border:0;border-radius:8px;padding:8px 14px;font-weight:600}
+.btn.alt{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.fcard{border:1px solid var(--line);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.fcard h3{font-size:16px}
+.fcard p{margin:0;color:var(--muted);font-size:13px}
+.fcard .btn{align-self:flex-start;margin-top:auto}
+.result{margin-top:14px;border-radius:10px;padding:12px 14px;background:var(--teal-soft)}
+.result ul{margin:6px 0 0;padding-left:18px}
+.kv{display:grid;grid-template-columns:170px 1fr;gap:6px 12px;margin:0}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.sect{margin-top:14px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}
+.sect h3{font-size:15px;margin-bottom:8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.pick{display:grid;gap:8px;margin-top:10px}
+.pick button{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;text-align:left}
+.pick button:hover{border-color:var(--teal)}
+textarea{width:100%;min-height:70px;font:13px/1.4 Consolas,"Courier New",monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:1100px){.two{grid-template-columns:1fr}}
+#toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:10px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .15s}
+#toast.show{opacity:1}
+.note{font-size:13px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div><h1>CareTend prescriptions in Salesforce</h1><p>Interactive walkthrough. Sample data only: names, NDCs and programs are test values.</p></div>
+  <div class="switchbox"><code>PRO_Automation_Control.CareTend_Prescription</code><span id="swlabel"></span>
+    <button class="sw" id="sw" role="switch" aria-checked="true" aria-label="CareTend prescription switch"></button></div>
+</header>
+<div class="app">
+  <aside class="rail"><h2>Demo script, 15 minutes</h2><div id="steps"></div><button class="reset" id="reset">Reset demo data</button></aside>
+  <main><div class="tabs" role="tablist" id="tabs"></div><div id="view"></div></main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+//ENGINE-START
+function normNdc(raw){
+  const t=String(raw==null?'':raw).trim();
+  if(!t) return {err:'NDC missing on prescription'};
+  const bad={err:'NDC not recognised: '+t};
+  if(!/^[0-9-]+$/.test(t)) return bad;
+  if(t.indexOf('-')>=0){
+    const p=t.split('-'); if(p.length!==3) return bad;
+    const k=p.map(x=>x.length).join('-');
+    if(k==='4-4-2') p[0]='0'+p[0];
+    else if(k==='5-3-2') p[1]='0'+p[1];
+    else if(k==='5-4-1') p[2]='0'+p[2];
+    else if(k!=='5-4-2') return bad;
+    return {key:p.join('')};
+  }
+  return t.length===11?{key:t}:bad;
+}
+function resolveProgram(programs,ndc){
+  const n=normNdc(ndc); if(n.err) return {reason:n.err};
+  const hits=programs.filter(p=>p.active&&String(p.ndcs||'').split(/[\n,]+/).some(x=>{const m=normNdc(x);return m.key===n.key;}));
+  if(hits.length===1) return {program:hits[0]};
+  if(hits.length===0) return {reason:'NDC not mapped to a program: '+String(ndc).trim()};
+  return {reason:'NDC '+String(ndc).trim()+' is mapped to '+hits.length+' programs'};
+}
+function sameName(a,pt){return a.first.toLowerCase()===String(pt.first||'').toLowerCase()&&a.last.toLowerCase()===String(pt.last||'').toLowerCase();}
+function matchPatient(accounts,row){
+  const pt=row.pt;
+  const byId=accounts.filter(a=>a.ctid&&a.ctid===pt.ctid);
+  if(byId.length===1) return {acct:byId[0],method:'Auto - CareTend Patient Id'};
+  if(!pt.first||!pt.last||!pt.dob) return {reason:'EHR Patient missing name or date of birth'};
+  let c=accounts.filter(a=>a.dob===pt.dob&&sameName(a,pt));
+  if(c.length===0) return {reason:'No patient with matching name and date of birth'};
+  if(c.length>1&&row.program){const f=c.filter(a=>a.programs.indexOf(row.program)>=0); if(f.length===1) c=f;}
+  if(c.length===1) return {acct:c[0],method:'Auto - Demographics'};
+  return {reason:c.length+' patients match name and date of birth'};
+}
+function processRow(st,row){
+  const reasons=[];
+  const pr=resolveProgram(st.programs,row.ndc);
+  if(pr.program) row.program=pr.program.id; else {row.program=null; reasons.push(pr.reason);}
+  if(row.method==='Manual'){ /* never overwritten */ }
+  else{
+    const m=matchPatient(st.accounts,row);
+    if(m.acct){row.acct=m.acct.id;row.method=m.method;} else {row.acct=null;row.method='Unmatched';reasons.push(m.reason);}
+  }
+  row.reason=reasons.join('; ').slice(0,255);
+  row.review=!!row.reason;
+  afterSave(st,row);
+}
+function afterSave(st,row){
+  if(!row.acct||!row.pt.ctid) return;
+  const a=st.accounts.find(x=>x.id===row.acct);
+  if(a&&!a.ctid&&!st.accounts.some(x=>x.ctid===row.pt.ctid)){a.ctid=row.pt.ctid;row.learned=true;}
+}
+function landRow(st,row){ // as MuleSoft sends it
+  row.program=null;row.acct=null;row.method='';row.review=true;row.reason='';
+  if(st.on) processRow(st,row);
+}
+//ENGINE-END
+
+const PROG_NAME_UNKNOWN='Unknown Program';
+const FEED={
+  daniel1:{title:'Daniel, RX-E2E-1',note:'NDC 72990-103-10. Patient Daniel CareTendTest, born 1980-04-15.',row:{rx:'RX-E2E-1',med:'Sample medication A',ndc:'72990-103-10',strength:'50 mg',route:'Oral',freq:'Twice daily',status:'Active',pt:{first:'Daniel',last:'CareTendTest',dob:'1980-04-15',ctid:'CT-77120'}}},
+  daniel2:{title:'Daniel, RX-E2E-2',note:'NDC 55555-5555-55, which no program lists yet.',row:{rx:'RX-E2E-2',med:'Sample medication B',ndc:'55555-5555-55',strength:'10 mg',route:'Oral',freq:'Once daily',status:'Active',pt:{first:'Daniel',last:'CareTendTest',dob:'1980-04-15',ctid:'CT-77120'}}},
+  twin:{title:'Twin, RX-TWIN-1',note:'Two people share this name and birth date. NDC 72990-103-10.',row:{rx:'RX-TWIN-1',med:'Sample medication A',ndc:'72990-103-10',strength:'50 mg',route:'Oral',freq:'Twice daily',status:'Active',pt:{first:'Twin',last:'CareTendTest',dob:'1990-06-02',ctid:'CT-88231'}}},
+  nobody:{title:'Nora, RX-NOPT-1',note:'A patient who does not exist in Salesforce.',row:{rx:'RX-NOPT-1',med:'Sample medication A',ndc:'72990-103-10',strength:'50 mg',route:'Oral',freq:'Once daily',status:'Active',pt:{first:'Nora',last:'Unlisted',dob:'1975-01-30',ctid:'CT-99001'}}},
+  bare:{title:'Daniel, RX-BARE-1',note:'NDC sent as ten bare digits: 7299010310.',row:{rx:'RX-BARE-1',med:'Sample medication A',ndc:'7299010310',strength:'50 mg',route:'Oral',freq:'Once daily',status:'Active',pt:{first:'Daniel',last:'CareTendTest',dob:'1980-04-15',ctid:'CT-77120'}}}
+};
+const STEPS=[
+ {t:'1. Today\'s problem',m:'2 min',d:'Open All prescriptions. Every legacy row has no program, no patient, Requires Review ticked and no reason.',tab:'all'},
+ {t:'2. A good day',m:'3 min',d:'Send Daniel\'s RX-E2E-1. Open it, then open Daniel on Patients to see the learned CareTend id.',tab:'feed'},
+ {t:'3. Something it could not do',m:'3 min',d:'Send RX-E2E-2. Open it in CareTend Review, add its NDC to Fennec Hears on Programs, then press Reprocess.',tab:'feed'},
+ {t:'4. Two look-alike patients',m:'3 min',d:'Send the Twin row. Open it in CareTend Review and press Match Patient.',tab:'feed'},
+ {t:'5. Guard rails',m:'2 min',d:'Turn the switch OFF and send a row: it lands untouched. Turn it ON again.',tab:'feed'},
+ {t:'6. What is left',m:'2 min',d:'Roles, review owner, Beren NDCs, UAT feed, MuleSoft changes.',tab:'left'}
+];
+const TABS=[['feed','CareTend feed'],['review','CareTend Review'],['all','All prescriptions'],['patients','Patients'],['programs','Programs'],['left','What is left']];
+
+let S;
+function fresh(){
+  const legacy=[];
+  for(let i=0;i<33;i++) legacy.push({id:'L'+i,legacy:true,rx:'500052'+String(100+i),med:'(not sent)',ndc:'',strength:'',route:'',freq:'',status:i%3?'Active':'Completed',pt:{first:'',last:'',dob:'',ctid:''},program:null,fixedProgram:i<2?'Fennec Hears':null,acct:null,method:'',review:true,reason:''});
+  return {
+    on:true,tab:'all',step:0,sel:null,patient:'A1',picking:false,last:null,
+    programs:[
+      {id:'P1',name:'Fennec Hears',ndcs:'72990-103-10',active:true},
+      {id:'P2',name:'DefenCath',ndcs:'73077-0010-01',active:true},
+      {id:'P3',name:'Invivyd',ndcs:'80100-0201-01',active:true}
+    ],
+    accounts:[
+      {id:'A1',first:'Daniel',last:'CareTendTest',dob:'1980-04-15',city:'Columbus',programs:['P1'],ctid:null},
+      {id:'A2',first:'Twin',last:'CareTendTest',dob:'1990-06-02',city:'Dayton',programs:['P3'],ctid:null},
+      {id:'A3',first:'Twin',last:'CareTendTest',dob:'1990-06-02',city:'Toledo',programs:['P2'],ctid:null}
+    ],
+    rows:legacy
+  };
+}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const progName=r=>r.program?(S.programs.find(p=>p.id===r.program)||{}).name:(r.fixedProgram||PROG_NAME_UNKNOWN);
+const acctOf=r=>S.accounts.find(a=>a.id===r.acct);
+const acctName=a=>a?esc(a.first+' '+a.last):'<span class="tag dim">none</span>';
+let toastT;
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);}
+
+function send(key){
+  const f=FEED[key].row, ex=S.rows.find(r=>r.rx===f.rx);
+  let row=ex;
+  if(!ex){row=Object.assign({id:'R'+S.rows.length+Date.now(),legacy:false,manual:false},JSON.parse(JSON.stringify(f)));S.rows.unshift(row);landRow(S,row);}
+  else {Object.assign(row,JSON.parse(JSON.stringify(f)));if(S.on) processRow(S,row); }
+  S.sel=row.id;
+  const pn=row.program?progName(row):null,a=acctOf(row),msgs=[];
+  if(!S.on) msgs.push('The switch is OFF, so the row landed as MuleSoft sent it: Unknown Program, no patient, Requires Review ticked, no reason.');
+  else{
+    msgs.push(pn?'Filed under '+pn+'.':'Not filed: '+row.reason.split('; ')[0]+'.');
+    msgs.push(a?'Patient found: '+a.first+' '+a.last+' ('+row.method+').':'No patient linked.');
+    if(row.learned){msgs.push('CareTend patient id '+row.pt.ctid+' written onto the Account.');row.learned=false;}
+    if(row.review) msgs.push('Flagged for review: '+row.reason);
+  }
+  S.last={title:FEED[key].title,msgs,id:row.id};
+  toast(ex?'Re-sent '+f.rx+' (same prescription id, so it updates the same row)':'Sent '+f.rx+' from CareTend');
+  render();
+}
+
+function tagFor(r){
+  if(!S.on&&!r.legacy&&r.method==='') return '<span class="tag warn">Requires review</span>';
+  return r.review?'<span class="tag warn">Requires review</span>':'<span class="tag ok">Filed</span>';
+}
+function rowsTable(rows,withDetail){
+  if(!rows.length) return '<p class="note">Nothing here. Send a prescription from the CareTend feed.</p>';
+  return '<div class="scroll"><table><thead><tr><th>Prescription</th><th>Program</th><th>Patient</th><th>Match method</th><th>Status</th><th>Reason</th></tr></thead><tbody>'+
+   rows.map(r=>'<tr data-open="'+r.id+'" class="'+(S.sel===r.id?'sel':'')+'" tabindex="0"><td><b>'+esc(r.rx)+'</b><br><span class="note">'+esc(r.med)+'</span></td><td>'+esc(progName(r))+'</td><td>'+acctName(acctOf(r))+'</td><td>'+esc(r.method||'')+'</td><td>'+tagFor(r)+'</td><td>'+esc(r.reason||'')+'</td></tr>').join('')+'</tbody></table></div>';
+}
+function detail(){
+  const r=S.rows.find(x=>x.id===S.sel); if(!r) return '';
+  const a=acctOf(r);
+  let h='<div class="panel"><h2>'+esc(r.rx)+'</h2><p class="sub">EHR Medication Prescription'+(r.legacy?' (legacy row, sample)':'')+'</p><div class="two"><dl class="kv">'+
+   '<dt>Medication</dt><dd>'+esc(r.med)+'</dd><dt>NDC</dt><dd>'+esc(r.ndc||'not sent')+'</dd><dt>Strength</dt><dd>'+esc(r.strength||'')+'</dd><dt>Route</dt><dd>'+esc(r.route||'')+'</dd><dt>Frequency</dt><dd>'+esc(r.freq||'')+'</dd><dt>Status</dt><dd>'+esc(r.status)+'</dd></dl>'+
+   '<div class="sect" style="margin-top:0"><h3>CareTend Matching</h3><dl class="kv"><dt>Program</dt><dd>'+esc(progName(r))+'</dd><dt>Patient</dt><dd>'+acctName(a)+'</dd><dt>Match method</dt><dd>'+esc(r.method||'none')+'</dd><dt>CareTend patient id</dt><dd>'+esc(r.pt.ctid||'none')+'</dd><dt>Requires review</dt><dd>'+(r.review?'Yes':'No')+'</dd><dt>Review reason</dt><dd>'+esc(r.reason||'none')+'</dd></dl></div></div>';
+  h+='<div class="actions"><button class="btn" data-act="pick"'+(r.legacy?' disabled':'')+'>Match Patient</button><button class="btn alt" data-act="reprocess">Reprocess</button></div>';
+  if(S.picking&&!r.legacy){
+    h+='<div class="pick" role="group" aria-label="Choose the patient">'+S.accounts.map(x=>'<button data-pick="'+x.id+'"><b>'+esc(x.first+' '+x.last)+'</b> &nbsp; born '+esc(x.dob)+', '+esc(x.city)+'<br><span class="note">Enrolled in '+esc(x.programs.map(i=>S.programs.find(p=>p.id===i).name).join(', '))+'</span></button>').join('')+'</div>';
+  }
+  return h+'</div>';
+}
+function viewFeed(){
+  let h='<div class="panel"><h2>CareTend feed</h2><p class="sub">Each button plays what MuleSoft does every 30 minutes: it lands the row as sent (Unknown Program, no patient, Requires Review ticked). With the switch ON, Salesforce then files and matches it.</p><div class="cards">'+
+  Object.keys(FEED).map(k=>'<div class="fcard"><h3>'+esc(FEED[k].title)+'</h3><p>'+esc(FEED[k].note)+'</p><button class="btn" data-send="'+k+'">Send from CareTend</button></div>').join('')+'</div>';
+  if(S.last) h+='<div class="result"><b>'+esc(S.last.title)+'</b><ul>'+S.last.msgs.map(m=>'<li>'+esc(m)+'</li>').join('')+'</ul><div class="actions"><button class="btn alt" data-open-last="'+S.last.id+'">Open the row</button></div></div>';
+  return h+'</div>'+detail();
+}
+function viewReview(){
+  const rows=S.rows.filter(r=>r.review&&!r.legacy);
+  return '<div class="panel"><h2>CareTend Review</h2><p class="sub">Rows Salesforce could not place, with the reason. Open a row to fix it.</p>'+rowsTable(rows)+'</div>'+detail();
+}
+function viewAll(){
+  const n=S.rows.length, noProg=S.rows.filter(r=>!r.program&&!r.fixedProgram).length, unlinked=S.rows.filter(r=>!r.acct).length, flagged=S.rows.filter(r=>r.review).length;
+  return '<div class="panel"><h2>All prescriptions</h2><p class="sub">The 33 rows below are sample legacy rows shaped like production today.</p><div class="stats"><div class="stat"><b>'+n+'</b><span>prescriptions</span></div><div class="stat bad"><b>'+noProg+'</b><span>without a program</span></div><div class="stat bad"><b>'+unlinked+'</b><span>not linked to a patient</span></div><div class="stat"><b>'+flagged+'</b><span>requires review</span></div></div>'+rowsTable(S.rows)+'</div>'+detail();
+}
+function viewPatients(){
+  const a=S.accounts.find(x=>x.id===S.patient);
+  const list=S.rows.filter(r=>r.acct===a.id&&r.program);
+  return '<div class="panel"><h2>Patients</h2><div class="tabs">'+S.accounts.map(x=>'<button class="tab" data-patient="'+x.id+'" aria-selected="'+(x.id===a.id)+'">'+esc(x.first+' '+x.last)+(x.city?' ('+esc(x.city)+')':'')+'</button>').join('')+'</div>'+
+  '<dl class="kv"><dt>Name</dt><dd>'+esc(a.first+' '+a.last)+'</dd><dt>Date of birth</dt><dd>'+esc(a.dob)+'</dd><dt>Enrolled in</dt><dd>'+esc(a.programs.map(i=>S.programs.find(p=>p.id===i).name).join(', '))+'</dd><dt>CareTend patient id</dt><dd>'+(a.ctid?'<span class="tag ok">'+esc(a.ctid)+'</span>':'<span class="tag dim">not learned yet</span>')+'</dd></dl>'+
+  '<div class="sect"><h3>Prescriptions (CareTend)</h3>'+(list.length?'<table><thead><tr><th>Medication</th><th>NDC</th><th>Strength</th><th>Route</th><th>Frequency</th><th>Status</th><th>Program</th></tr></thead><tbody>'+list.map(r=>'<tr data-open="'+r.id+'" tabindex="0"><td>'+esc(r.med)+'</td><td>'+esc(r.ndc)+'</td><td>'+esc(r.strength)+'</td><td>'+esc(r.route)+'</td><td>'+esc(r.freq)+'</td><td>'+esc(r.status)+'</td><td>'+esc(progName(r))+'</td></tr>').join('')+'</tbody></table>':'<p class="note">No prescriptions visible. A row appears here once it is linked to this patient and filed under a program.</p>')+'</div></div>'+detail();
+}
+function viewPrograms(){
+  return '<div class="panel"><h2>Programs</h2><p class="sub">Ops maintain the NDC list on each Program record. Any printed format works, one per line. These are test NDCs, not real product codes.</p><div class="cards">'+
+  S.programs.map(p=>'<div class="fcard"><h3>'+esc(p.name)+'</h3><label class="note" for="n-'+p.id+'">Program NDCs</label><textarea id="n-'+p.id+'">'+esc(p.ndcs)+'</textarea><button class="btn" data-save="'+p.id+'">Save program</button></div>').join('')+'</div></div>';
+}
+function viewLeft(){
+  const it=[['Roles that see prescriptions, and where','Rachel','Open. Blocks the visibility permission set'],['Who works the review list, and the target time','Rachel','Open'],['In-scope NDC list including Beren','Rachel, Angel','Partly done. 10 NDCs on 5 prod programs, none for Beren'],['Salesforce owns matching (TD-2055)','CTO with Nicole and Frey','Open. The build assumes yes'],['A UAT feed from CareTend Staging','Nicole raises it, Nicki White or Frey builds it','Open. Biggest risk'],['MuleSoft changes (DD-815)','Frey','Send NDC, patient id and status. Fix creates, alerting, mule.key'],['Delcath Customer Account in fulluat','Angel','Blocked. Production is done']];
+  return '<div class="panel"><h2>What is left before switch-on</h2><table><thead><tr><th>What</th><th>Owner</th><th>Status</th></tr></thead><tbody>'+it.map(x=>'<tr><td><b>'+esc(x[0])+'</b></td><td>'+esc(x[1])+'</td><td>'+esc(x[2])+'</td></tr>').join('')+'</tbody></table></div>';
+}
+function render(){
+  $('#sw').setAttribute('aria-checked',S.on);
+  $('#swlabel').innerHTML='<b>'+(S.on?'ON':'OFF')+'</b>';
+  $('#steps').innerHTML=STEPS.map((s,i)=>'<button class="step" data-step="'+i+'" aria-current="'+(i===S.step)+'"><b>'+esc(s.t)+' <small>'+s.m+'</small></b><span>'+esc(s.d)+'</span></button>').join('');
+  $('#tabs').innerHTML=TABS.map(t=>'<button class="tab" role="tab" data-tab="'+t[0]+'" aria-selected="'+(t[0]===S.tab)+'">'+t[1]+(t[0]==='review'?' ('+S.rows.filter(r=>r.review&&!r.legacy).length+')':'')+'</button>').join('');
+  $('#view').innerHTML=({feed:viewFeed,review:viewReview,all:viewAll,patients:viewPatients,programs:viewPrograms,left:viewLeft})[S.tab]();
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-send],[data-tab],[data-step],[data-open],[data-open-last],[data-act],[data-pick],[data-patient],[data-save],#sw,#reset'); if(!b) return;
+  if(b.id==='sw'){S.on=!S.on;toast('Switch '+(S.on?'ON: new rows are filed and matched':'OFF: rows land exactly as sent'));render();return;}
+  if(b.id==='reset'){S=fresh();render();toast('Demo data reset');return;}
+  if(b.dataset.send) return send(b.dataset.send);
+  if(b.dataset.tab){S.tab=b.dataset.tab;S.picking=false;return render();}
+  if(b.dataset.step!==undefined){S.step=+b.dataset.step;S.tab=STEPS[S.step].tab;S.picking=false;return render();}
+  if(b.dataset.open||b.dataset.openLast){S.sel=b.dataset.open||b.dataset.openLast;S.picking=false;if(b.dataset.openLast)S.tab='review';return render();}
+  if(b.dataset.patient){S.patient=b.dataset.patient;return render();}
+  if(b.dataset.save){const ta=document.getElementById('n-'+b.dataset.save);S.programs.find(p=>p.id===b.dataset.save).ndcs=ta.value;toast('Program saved. Press Reprocess on a flagged row to use the new NDC.');return render();}
+  const r=S.rows.find(x=>x.id===S.sel);
+  if(b.dataset.act==='pick'){S.picking=!S.picking;return render();}
+  if(b.dataset.act==='reprocess'&&r){
+    if(!S.on){toast('The switch is OFF: Reprocess changed nothing');return;}
+    processRow(S,r);toast(r.review?'Still needs review: '+r.reason:'Still needs review: false. Row is filed and linked.');return render();
+  }
+  if(b.dataset.pick&&r){
+    const a=S.accounts.find(x=>x.id===b.dataset.pick);
+    r.acct=a.id;r.method='Manual';
+    const pr=resolveProgram(S.programs,r.ndc); r.program=pr.program?pr.program.id:null;
+    r.reason=pr.reason||'';r.review=!!r.reason;
+    afterSave(S,r);S.picking=false;toast('Matched to '+a.first+' '+a.last+' (Manual). Their CareTend id is learned.');return render();
+  }
+});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('tr[data-open]')){e.preventDefault();e.target.click();}});
+S=fresh();render();
+</script>
+</body>
+</html>
